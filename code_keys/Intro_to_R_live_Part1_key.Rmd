@@ -141,6 +141,8 @@ After you've installed it (or if it was previously installed), we need to load i
 ```{r}
 #install.packages("tidyverse")
 library(tidyverse)
+library(here)
+setwd(here())
 ```
 
 

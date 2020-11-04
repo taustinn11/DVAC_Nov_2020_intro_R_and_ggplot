@@ -11,8 +11,7 @@ To view this document in powerpoint format, choose knit above!
 
 ## Goals for this presentation {.build .smaller}
 
-
-- To give a brief introduction to R
+- To give a brief introduction to R and explain why you should use it
 
 - To prepare you directly to use R with real biological data
 
@@ -29,11 +28,11 @@ To view this document in powerpoint format, choose knit above!
 
 ## What is R? What does R do?{.build}
 
-- R is an object-oriented programming language built by statisticians Ross Ihaka and Robert Gentleman
-  - Robert Gentleman is also an originator of the Bioconductor Project
+- R is an object-oriented programming language built by statisticians Ross Ihaka and Robert Gentleman (CITE)
+  - Robert Gentleman is also an originator of the Bioconductor Project (CITE)
   - R is used heavily in the academic community (particularly in biology) as well in industry settings
 
-- R has a TON of applications ranging from performing simple calculations, to exploring data, to performing statistical tests, to plotting, to scraping data, to building web apps, etc., etc.
+- R has a TON of applications beyond biostatistics and biological data viz like scraping data, building apps, plotting of several kinds of data, interacting with databases, software engineering, and developing machine learning models, etc.
 
 ```{r include=FALSE}
 # Data in two numeric vectors
@@ -69,7 +68,7 @@ t.test(weight~group, weight_data)
 
 For plotting
 
-```{r echo =  FALSE}
+```{r echo=F, message=FALSE, warning=FALSE}
 suppressMessages(library(tidyverse))
 suppressMessages(library(knitr))
 ```
@@ -107,45 +106,19 @@ ggplot(weight_data, aes(x = group, y = weight))+
   - An object can be a single value (which is considered a vector of size 1), a vector of values, a 2D table, a list of 2D tables, etc. The data in an object can be of any type
 - These data objects have a **class** (e.g. vector, matrix, list, etc.) based on the structure of the values and corresponding **attributes** based on the 'data type'
 - Functions in R are coded to interact with objects in specific ways depending on their class and attributes
-  
-## What does object-oriented mean?{.build}
-  
-```{r}
-# You can save any data as an object to be called by name later
-lbs_to_kg <- 1/2.22
-# "<-" is used to assign names to data
-lbs_to_kg
-```
 
-```{r}
-my_weight_lbs <- 180
-my_weight_kgs <- my_weight_lbs*lbs_to_kg
-my_weight_kgs
-```
+## What are the data objects in R{.build}
 
-## What does object-oriented mean? {.build .smaller}
-
-```{r}
-weight_data$weight #this is a variable from our data.frame called weight_data
-# It has a class of 'numeric vector' | it looks like it's in kg already!
-```
-
-```{r}
-weight_data$weight_lbs <- weight_data$weight*(1/lbs_to_kg)
-head(weight_data, 5)
-```
-```{r}
-methods("mean")
-```
-
-## What are the data objects in R
-
-![](planning/data_types.png){fig.height=3;fig.width=4}
+![](../planning/data_types.png){fig.height=3;fig.width=4}
     -  Note: Atomic vector just refers to 'vector'
 
 - We are going to primarily use data frames and vectors
   - This represents 'tabular' data aka data in table form
   - It is most similar to what you would organize in Microsoft Excel
+```{r}
+class(weight_data)
+```
+
 
 ## Tidy Data
 
@@ -156,7 +129,7 @@ methods("mean")
 
 ## Tidy Data
 
-![](planning/tidy_vs_untidy_data.png){width=100%}
+![](../planning/tidy_vs_untidy_data.png){width=100%}
 
 ---
 
