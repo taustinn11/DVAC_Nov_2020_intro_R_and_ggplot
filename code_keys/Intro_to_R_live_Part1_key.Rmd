@@ -1,0 +1,217 @@
+---
+title: "Intro_to_R_live_Part1_key"
+author: "Austin Nuckols"
+date: "11/3/2020"
+output: html_document
+---
+
+## Intro to RStudio Editor
+
+Open RStudio and take a look around
+
+You have 4 panes: Source Pane, Console, Environment/History, Files/etc pane
+- Console is for experimentation or quick code (x = 10)
+- Environment/History shows you what objects you have saved in R and what code you have just run, respectively
+- Files/etc. shows a lot of things
+  - Files shows the files in your current 'working directory'
+    - You may remember directories from the Bash/Linux workshop
+    - Your working directory is just the folder that you're currently in -- you may be able to recogenize it -- **show More: Go to and set WD**
+    - *When working in R outside of an R Project (we are in a project right now), you'll need to be sure that you set your working directory. Otherwise, R will not be able to find any files/data you try to reference*
+  - Plots is self-explanatory
+  - Packages just shows your package library and the ones that are currently loaded. You can mostly ignore this
+  - Help can be used to look up the help page of a function (help(mean))
+  - Viewer is for some other outputs that aren't plots
+- Source is where scripts (or similar file types) you are working on will go.    - Importantly, what you put in your console should be considered NOT saved, so code that you like should always be put into the script file
+
+You can open a script file in the top left corner by clicking the white sheet with a green plus on it, or by choosing File > New File > R Script. Also, if you want to take notes directly in the editor, I recommend using an R Markdown file which will let you separate code and regular text. When I say "script" in this workshop moving forward, I will be referring to any of these file types
+
+If you want to change any settings, you should go to Tools > Global Options which will open a window where you can customize your theme as well as several other features of RStudio
+
+Any major questions?
+
+## Code
+
+Let's talk about some code
+
+### Run code
+
+To run code you can press enter in the Console or press Ctrl+Enter (or Cmd+Enter for Mac) when in a script/chunk.
+
+If you are in Rmd right now, choose the Insert option (just above the source pane w/ Green square with a c and a plus) and choose 'R' to insert an R chunk. In Rmd this is how code is separated from text and can run
+
+Shortcut: Ctrl+Alt+I - this inserts a chunk
+
+```{r}
+4+8
+```
+
+In script, be sure your cursor is in the code you want to run. 
+
+You can also highlight the code and click Run on the top right, but this is slower, so I don't recommend it
+
+### Comments
+
+If you're in a script file (like me) you'll use # to indicate a comment. 
+
+In your coding space, type # and say this is a comment and try to run it -- it didn't do anything right?
+
+You can put comments in the same line as actual code as long as it's after the code, and your code will run while the comment will not
+
+```{r}
+# Comments are not run as code and are great for leaving notes in your code
+```
+
+```{r}
+x # Add another comment
+```
+
+### Making some Data
+
+We are going to start with some basics for how to make a data frame in R. This is useful for understanding the structure
+
+We've seen how to assign objects already using the "less than, dash". We can assign any values we want to a name | Shortcut: Alt + - (dash)
+
+If we assign several values to a name, we can create a vector
+
+We do this using the c() function (which stands for combine)
+
+Let's make a genotype variable for our data frame -- be sure to include quotes since we are adding values that are not numbers
+
+```{r}
+genotype <- c("WT", "WT", "WT", "WT", "KO", "KO", "KO", "KO")
+```
+
+We now have a charactor vector that represents genotypes. Now let's come up with some values for our genotypes
+
+you can use rnorm() to generate random values from the normal distribution (since this is just practice)
+
+```{r}
+wt <- rnorm(n = 4, mean = 10, 4)
+ko <- rnorm(n = 4, mean = 20, 5)
+
+values <- c(wt, ko)
+values
+```
+
+Now let's make a data frame with these. We can use data.frame()
+
+```{r}
+my_df <- data.frame(genotype,
+           values)
+```
+
+If you try to put vectors together that aren't the same length, you'll get an error
+
+```{r}
+#data.frame(genotype,
+#           rnorm(9, 0, 1))
+```
+
+This makes sure your data stays symmetrical
+
+If I want to look at my data, there are a few commands I can use
+First print
+
+```{r}
+my_df
+```
+
+But sometimes it's too big, so we can use others
+
+These are used to get an overview of the data
+
+```{r}
+view(my_df) # Opens a new viewer and can be good for large data
+head(my_df) # pulls just the top 6 rows
+summary(my_df) # Gives a summary of each variable -- it is particularly useful for the numerical variables 
+```
+
+Questions? 
+
+## Practical Data Examples
+
+Now we are going to read in some data. In this tutorial, we are going to use the tidyverse package. For many of you, you'll need to install it
+
+While this installs, I'll talk about packages. Packages simply put are just a collection of functions that were built for a specific purpose. You get to use the shorthand function, and the file that defines the function in the package actually just contains instructions that R can use on the back end to convert the function into base R commands.
+
+The tidyverse is actually a suite of packages that are meant to simplify R programming and empower the users. We are going to work using functions from within tidyverse packages
+
+After you've installed it (or if it was previously installed), we need to load it using library()
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+
+### HEK WB Data
+
+Let's say I have some WB quantification data for different HEK cell samples. However, I have two data files, one more updated than the other, and I want to clean the first one and then join it together with the more updated one and save it as a new file
+
+Here we are reading the data which is saved in the data/part1/ folder as a .csv file
+
+```{r}
+hek1 <- read_csv("data/part1/10.23.19_hek.csv")
+hek2 <- read_csv("data/part1/hek_wb_combined.csv")
+
+```
+
+Let's take a look
+
+```{r}
+head(hek1); head(hek2)
+```
+
+Now let's clean this data -- we're going to use a series of functions that are all "piped" together so that the output of one is the input of th enext
+
+```{r}
+library(lubridate)
+
+hek1_clean <- hek1 %>% 
+  filter(lysis == "new") %>% 
+  select(-c(lysis, blotid)) %>% 
+  rename(total_protein_signal = tp) %>% 
+  mutate(date = mdy("10-23-19"))
+
+hek_combined_clean <- full_join(hek1_clean, hek2) %>% 
+  mutate(value_corrected = value/total_protein_signal) %>% 
+  select(-c(value, total_protein_signal))
+
+hek_combined_clean %>% 
+  group_by(sampleid, protein) %>% 
+  summarise(ave = mean(value_corrected),
+            sd = sd(value_corrected)) %>% 
+  arrange(protein)
+
+write_rds(hek_combined_clean, "data/part2/hek_wb_combined_clean.rds")
+```
+
+### Enzyme Contaminants
+
+Now let's say I have some enzyme assay data that I've taken at a few time points
+
+I want to plot the change in values for the different samples over time. Some of my proteins are contaminated with an enzyme, and I need to see if they have enzymatic activity just on their own
+
+```{r}
+ts <- read_csv("data/part1/enzyme_contaminants_ts.csv")
+```
+
+```{r}
+head(ts)
+```
+
+```{r}
+ts_cleaned <- ts %>%
+  pivot_longer(
+    contains("t"),
+    names_to = "time_point",
+    values_to = "value",
+    names_prefix = "t"
+  ) %>%
+  mutate(time_point = as.numeric(time_point))
+
+write_rds(ts_cleaned, "data/part2/enzyme_contaminants_ts_cleaned.rds")
+```
+
+### Others?
+
