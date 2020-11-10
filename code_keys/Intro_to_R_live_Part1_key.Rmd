@@ -15,7 +15,7 @@ You have 4 panes: Source Pane, Console, Environment/History, Files/etc pane
 - Files/etc. shows a lot of things
   - Files shows the files in your current 'working directory'
     - You may remember directories from the Bash/Linux workshop
-    - Your working directory is just the folder that you're currently in -- you may be able to recogenize it -- **show More: Go to and set WD**
+    - Your working directory is just the folder that you're currently in -- we'll talk more about that in a minute
     - *When working in R outside of an R Project (we are in a project right now), you'll need to be sure that you set your working directory. Otherwise, R will not be able to find any files/data you try to reference*
   - Plots is self-explanatory
   - Packages just shows your package library and the ones that are currently loaded. You can mostly ignore this
@@ -65,72 +65,27 @@ You can put comments in the same line as actual code as long as it's after the c
 x # Add another comment
 ```
 
-### Making some Data
-
-We are going to start with some basics for how to make a data frame in R. This is useful for understanding the structure
-
-We've seen how to assign objects already using the "less than, dash". We can assign any values we want to a name | Shortcut: Alt + - (dash)
-
-If we assign several values to a name, we can create a vector
-
-We do this using the c() function (which stands for combine)
-
-Let's make a genotype variable for our data frame -- be sure to include quotes since we are adding values that are not numbers
+In a chunk, let's assign a new variable:
+  Ctrl+Alt+I - this inserts a chunk
+  
+  Another shortcut that's nice is the assignment shortcut:
+    Alt + - (Alt + the minus sign)
 
 ```{r}
-genotype <- c("WT", "WT", "WT", "WT", "KO", "KO", "KO", "KO")
-```
-
-We now have a charactor vector that represents genotypes. Now let's come up with some values for our genotypes
-
-you can use rnorm() to generate random values from the normal distribution (since this is just practice)
-
-```{r}
-wt <- rnorm(n = 4, mean = 10, 4)
-ko <- rnorm(n = 4, mean = 20, 5)
-
-values <- c(wt, ko)
-values
-```
-
-Now let's make a data frame with these. We can use data.frame()
-
-```{r}
-my_df <- data.frame(genotype,
-           values)
-```
-
-If you try to put vectors together that aren't the same length, you'll get an error
-
-```{r}
-#data.frame(genotype,
-#           rnorm(9, 0, 1))
-```
-
-This makes sure your data stays symmetrical
-
-If I want to look at my data, there are a few commands I can use
-First print
-
-```{r}
-my_df
-```
-
-But sometimes it's too big, so we can use others
-
-These are used to get an overview of the data
-
-```{r}
-view(my_df) # Opens a new viewer and can be good for large data
-head(my_df) # pulls just the top 6 rows
-summary(my_df) # Gives a summary of each variable -- it is particularly useful for the numerical variables 
+y <- 8 # This is our new object 'y'
 ```
 
 Questions? 
 
 ## Practical Data Examples
 
-Now we are going to read in some data. In this tutorial, we are going to use the tidyverse package. For many of you, you'll need to install it
+### Up top items
+
+Now we are going to read in some data. In this tutorial, we are going to use the tidyverse package, the lubridate package, and the here package. If you have not already installed them, please do now using
+
+```{r eval=FALSE}
+install.packages("tidyverse", "lubridate", "here")
+```
 
 While this installs, I'll talk about packages. Packages simply put are just a collection of functions that were built for a specific purpose. You get to use the shorthand function, and the file that defines the function in the package actually just contains instructions that R can use on the back end to convert the function into base R commands.
 
@@ -139,32 +94,60 @@ The tidyverse is actually a suite of packages that are meant to simplify R progr
 After you've installed it (or if it was previously installed), we need to load it using library()
 
 ```{r}
-#install.packages("tidyverse")
 library(tidyverse)
 library(here)
-setwd(here())
 ```
 
+library() tells R to load the package to the current session so that it can be used. Not all libraries are loaded all of the time because sometimes, their functions conflict with functions in other packages. Therefore, it is necessary to load a library when you want to use it
+
+Now we need to ensure that our working directory is set. The working directory (see the Files pane) is simply where R starts when it needs to look for files/data. Setting your working directory is crucial. This is why we use the 'here' package.
+
+In the console, we need to type the following code:
+`getwd()`
+
+It should say "~/DVAC_Nov_2020_intro_R_and_ggplot"
+i.e. it should match the output of `here()`
+
+If it does not, run `setwd(here())`
 
 ### HEK WB Data
+
+Now let's get into the actual data
 
 Let's say I have some WB quantification data for different HEK cell samples. However, I have two data files, one more updated than the other, and I want to clean the first one and then join it together with the more updated one and save it as a new file
 
 Here we are reading the data which is saved in the data/part1/ folder as a .csv file
 
 ```{r}
+setwd(here())
 hek1 <- read_csv("data/part1/10.23.19_hek.csv")
 hek2 <- read_csv("data/part1/hek_wb_combined.csv")
-
 ```
 
-Let's take a look
+Let's go over some functions you can use to take a peek at your data
 
 ```{r}
 head(hek1); head(hek2)
+view(hek1)
+view(hek2)
+
+summary(hek1)
+summary(hek2)
 ```
 
-Now let's clean this data -- we're going to use a series of functions that are all "piped" together so that the output of one is the input of th enext
+Now let's clean this data -- we're going to use a series of functions that are all "piped" together so that the output of one is the input of the next
+
+Summary:
+  Filter for new lysis methods
+  remove variables that aren't useful
+  rename a variable so that it matches the other data set
+  add a date variable
+  
+  Join the data
+  Make corrected value by dividing the value by the total protein signal
+  drop the unused variables
+  
+  Draw up a summary table that I can view
 
 ```{r}
 library(lubridate)
@@ -184,8 +167,33 @@ hek_combined_clean %>%
   summarise(ave = mean(value_corrected),
             sd = sd(value_corrected)) %>% 
   arrange(protein)
+```
 
-write_rds(hek_combined_clean, "data/part2/hek_wb_combined_clean.rds")
+Now let's experiment with different ways of graphing this data using ggplot
+
+On ggplot:
+  The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
+  
+  In short, the grammar of graphics states that graphs are generated layer by layer, with elements being stacked on top of one another. We can illustrate this with our WB example
+
+```{r}
+hek_combined_clean %>% 
+  ggplot(aes(x = protein, y = value_corrected, fill = sampleid))+
+  geom_boxplot()+
+  facet_wrap(facets = ~date)
+  #geom_point()
+
+hek_combined_clean %>% 
+  filter(date > mdy("10-23-2019")) %>% 
+  ggplot(aes(x = sampleid, y = value_corrected, fill = protein))+
+  geom_boxplot()+
+  facet_wrap(~protein,
+             scales = "free")+
+  xlab("")+
+  ylab("Corrected Intensity (A.U.)")+
+  ggtitle("There is no difference between the samples for these proteins")+
+  labs(fill = "Protein ID")+
+  theme_bw()
 ```
 
 ### Enzyme Contaminants
@@ -195,12 +203,17 @@ Now let's say I have some enzyme assay data that I've taken at a few time points
 I want to plot the change in values for the different samples over time. Some of my proteins are contaminated with an enzyme, and I need to see if they have enzymatic activity just on their own
 
 ```{r}
-ts <- read_csv("data/part1/enzyme_contaminants_ts.csv")
+ts <- read_csv("../data/part1/enzyme_contaminants_ts.csv")
 ```
 
 ```{r}
 head(ts)
 ```
+
+There is not really much to clean from this data. However, we see that the data is in a "wide" or a "spread out" format. While it was more convenient to collect the data like this, I ideally want to pull the time variable (which is currently spread horizontally) to be vertical
+  This may be referred to as "melting" the data frame (in Python). 
+In R, this is called "pivoting" the data
+  Essentially, you take this output and pivot it from wide to long format. It is better understood when seen in action
 
 ```{r}
 ts_cleaned <- ts %>%
@@ -211,9 +224,20 @@ ts_cleaned <- ts %>%
     names_prefix = "t"
   ) %>%
   mutate(time_point = as.numeric(time_point))
-
-write_rds(ts_cleaned, "data/part2/enzyme_contaminants_ts_cleaned.rds")
 ```
 
-### Others?
+```{r}
+ts_cleaned %>% 
+  ggplot(aes(x = time_point, y = value, color = sampleid))+
+  geom_point()+
+  geom_smooth(method = "lm",
+              se = FALSE)+
+  xlab("Time (min)")+
+  ylab("Fluorescence (A.U.)")+
+  labs(color = "")+
+  ggtitle("Protein A has identical activity to the enzyme itself!")+
+  theme_classic()
+```
+
+### DRC
 
