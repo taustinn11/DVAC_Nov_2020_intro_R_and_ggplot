@@ -172,6 +172,8 @@ summary(mice_clean)
 #Now we have a nice count for exactly how many of each we have.
 ```
 
+Notice that I am giving a descriptive name to the mice object after I make the modifications that I want to make. Instead of mice2 or mice3, I'm using mice_clean since I have done all of my cleaning operations in one shot. The other thing to notice is that I'm using snake case. This is the use of underscores to separate words. There are other methods like CamelCase or using dot.case. CamelCase is fine, but I would recommend against dot case because many programming languages use "." to separate an object and the method used on it (if you're familiar with Python or Javascript, then you've definitely seen this). Overall, CamelCase or snake_case are the best to use. I will use snake case. **The grand takeaways are 1) use a naming strategy that does not reinforce bad habits or conflict with other languages you may use (ie use CamelCase or snake_case) and 2) use descriptive terms when naming your objects. This will be incredibly useful when you have to revisit old code**
+
 Great, so let's get to the good stuff
 
 In our hypothetical example, we are starting treatment with 1 of 3 treatment options 3 weeks after our mice's births. We can actually check that in the code:

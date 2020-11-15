@@ -1,7 +1,7 @@
 ---
 title: "Intro to R Part 1"
 author: "Austin Nuckols"
-date: "11/10/2020"
+date: "11/16/2020"
 output: 
   ioslides_presentation:
     incremental: true
@@ -9,7 +9,7 @@ output:
 
 To view this document in slide format, choose knit above!
 
-## Goals for this workshop {.build .smaller}
+## Goals for this workshop {.build}
 
 - To give a brief introduction to R and explain why you should use it
 
@@ -19,13 +19,10 @@ To view this document in slide format, choose knit above!
 
    - Create high quality custom plots
 
-   - Bonus: write scripts that automate these two processes
-      - Builds off of the previous DVAC workshop "Terminal Commands and Bash Scripts"
-
 - To establish a foundation from which you can continue to learn R
 
 
-- There will be resources included on the Github page (https://github.com/taustinn11/DVAC_Nov_2020_intro_R_and_ggplot)
+- There will be resources included on the Github page <font size="4"> (https://github.com/taustinn11/DVAC_Nov_2020_intro_R_and_ggplot) </font>
 
 ## What is R? What does R do?{.build}
 
@@ -42,11 +39,11 @@ To view this document in slide format, choose knit above!
 ## Why should I use R (or any programming language)? {.smaller}
 
 - **Reproducibility and Efficiency**
-  - Every step *should be* recorded in your script ensuring analysis documentation and reproducibility
-  - A well-written script is reusable 
+  - Each step is recorded = documented (in addition to notes you type) and reproducible
+  - Well-written scripts are reusable 
     - Less time doing "prep analysis" work and more time considering the results
 - Scalability and Extensibility
-  - R can handle all kinds of data (images, text, tabular, unstructured) and all sizes of data
+  - R can handle all kinds of data (images, text, unstructured) and all sizes of data
   - R has over 10,000 packages for different statistical, plotting, mapping, and software development applications
 - Free, open source, and **produces high quality results**
   - Free & Open Source = Huge R community = support and rigor
@@ -83,8 +80,15 @@ mean(c(6, 9, 10, 15, 8, 3, 6))
 
 Stores data for viewing, manipulating, and performing statistical tests on
 
+```{r eval=FALSE}
+weight_data
+```
+
+```{r echo=FALSE}
+weight_data[8:11,]
+```
+
 ```{r echo = TRUE, out.height=4}
-slice(.data = weight_data, 8:11) #showing a small slice of my weight data
 t.test(weight~group, weight_data)
 ```
 
@@ -100,15 +104,16 @@ ggplot(weight_data, aes(x = group, y = weight))+
 
 ## Scope of this workshop {.smaller}
 
-- We are going to focus on reading data, modifying data, and plotting data
-- Importantly, there are too many considerations to discuss when selecting a statistical test to cover today
+- We are going to focus on reading data, modifying data, and plotting data today
+- Importantly, there are too many considerations to discuss when selecting statistical tests
   - Statistics will be a future workshop topic 
-  - You can message DVAC for statistics advice if you have a specific case or question (regardless of whether you are using R or not)
+  - You can message DVAC on our Slack with statistics questions (using R or otherwise)
 - We are going to bypass several key fundamentals of R programming
-  - This is a calculated decision to get you straight to working with **your data** and plotting **your data** without spending time on features you may not need necessarily
-  - If you want to continue learning R, checkout the Github page (https://github.com/taustinn11/DVAC_Nov_2020_intro_R_and_ggplot)
-    - Start with immediate files and links in the additional_resources/ folder  
-    - Follow this with the stuff in additional_resources/extra/
+  - Skip features you won't need right away
+  - Get you straight to working with and plotting **your data**
+- If you want to continue learning R, checkout the Github page (https://github.com/taustinn11/DVAC_Nov_2020_intro_R_and_ggplot)
+  - Start with files/links immediately found in additional_resources/ folder  
+  - Follow this with the files/links in additional_resources/extra/
 
 ## What does object-oriented mean?{.build .smaller}
 
@@ -116,7 +121,7 @@ ggplot(weight_data, aes(x = group, y = weight))+
   - 'Data types' are the kind of value a data point is
     - Age (e.g. 26) is "numeric" while Name (e.g. "Austin") is of type "character"
   - An 'object' is data that is organized into a structure and assigned a name
-    - A single value (which is considered a vector of size 1), a vector of values, a 2D table (data frame or a matrix), a list, etc. The data in an object can be of any type.
+    - A single value, a vector of values, a 2D table (data frame or a matrix), a list, etc
     - I could combine the Age and Name variables into a data frame and name it zoom_meeting_table
 
 ```{r}
@@ -127,7 +132,7 @@ zoom_meeting_table
 ```
 
 
-## What are the data objects in R {.build .smaller}
+## What are the data objects in R {.build}
 
 ![](../planning/data_types_highlighted.png){width=80%}
     
@@ -135,9 +140,15 @@ zoom_meeting_table
   - This represents 'tabular' data aka data in table form
   - It is most similar to what you would organize in Microsoft Excel
 
+## What are the data objects in R {.build}
+
+```{r}
+head(weight_data, 4)
+```
+
 ```{r}
 class(weight_data)
-class(weight_data$group);class(weight_data$weight)
+class(weight_data$group); class(weight_data$weight)
 ```
 
 ## A Quick Note about Tidy Data
