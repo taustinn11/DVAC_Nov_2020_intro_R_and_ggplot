@@ -10,16 +10,19 @@ output: html_document
 Open RStudio and take a look around
 
 You have 4 panes: Source Pane, Console, Environment/History, Files/etc pane
-- Console is for experimentation or quick code (x = 10)
+
+- Console is for experimentation or quick code `(x = 10)`
+
 - Environment/History shows you what objects you have saved in R and what code you have just run, respectively
+
 - Files/etc. shows a lot of things
   - Files shows the files in your current 'working directory'
     - You may remember directories from the Bash/Linux workshop
-    - Your working directory is just the folder that you're currently in -- you may be able to recogenize it -- **show More: Go to and set WD**
+    - Your working directory is just the folder that you're currently in -- we'll talk more about that in a minute
     - *When working in R outside of an R Project (we are in a project right now), you'll need to be sure that you set your working directory. Otherwise, R will not be able to find any files/data you try to reference*
   - Plots is self-explanatory
   - Packages just shows your package library and the ones that are currently loaded. You can mostly ignore this
-  - Help can be used to look up the help page of a function (help(mean))
+  - Help can be used to look up the help page of a function `(help(mean))`
   - Viewer is for some other outputs that aren't plots
 - Source is where scripts (or similar file types) you are working on will go.    - Importantly, what you put in your console should be considered NOT saved, so code that you like should always be put into the script file
 
@@ -38,8 +41,8 @@ Let's talk about some code
 To run code you can press enter in the Console or press Ctrl+Enter (or Cmd+Enter for Mac) when in a script/chunk.
 
 If you are in Rmd right now, choose the Insert option (just above the source pane w/ Green square with a c and a plus) and choose 'R' to insert an R chunk. In Rmd this is how code is separated from text and can run
-
-Shortcut: Ctrl+Alt+I - this inserts a chunk
+x
+`Shortcut: Ctrl+Alt+I - this inserts a chunk`
 
 ```{r}
 4+8
@@ -65,72 +68,27 @@ You can put comments in the same line as actual code as long as it's after the c
 x # Add another comment
 ```
 
-### Making some Data
-
-We are going to start with some basics for how to make a data frame in R. This is useful for understanding the structure
-
-We've seen how to assign objects already using the "less than, dash". We can assign any values we want to a name | Shortcut: Alt + - (dash)
-
-If we assign several values to a name, we can create a vector
-
-We do this using the c() function (which stands for combine)
-
-Let's make a genotype variable for our data frame -- be sure to include quotes since we are adding values that are not numbers
+In a chunk, let's assign a new variable:
+  Ctrl+Alt+I - this inserts a chunk
+  
+ ` Another shortcut that's nice is the assignment shortcut:`
+    `Alt + - (Alt + the minus sign)`
 
 ```{r}
-genotype <- c("WT", "WT", "WT", "WT", "KO", "KO", "KO", "KO")
-```
-
-We now have a charactor vector that represents genotypes. Now let's come up with some values for our genotypes
-
-you can use rnorm() to generate random values from the normal distribution (since this is just practice)
-
-```{r}
-wt <- rnorm(n = 4, mean = 10, 4)
-ko <- rnorm(n = 4, mean = 20, 5)
-
-values <- c(wt, ko)
-values
-```
-
-Now let's make a data frame with these. We can use data.frame()
-
-```{r}
-my_df <- data.frame(genotype,
-           values)
-```
-
-If you try to put vectors together that aren't the same length, you'll get an error
-
-```{r}
-#data.frame(genotype,
-#           rnorm(9, 0, 1))
-```
-
-This makes sure your data stays symmetrical
-
-If I want to look at my data, there are a few commands I can use
-First print
-
-```{r}
-my_df
-```
-
-But sometimes it's too big, so we can use others
-
-These are used to get an overview of the data
-
-```{r}
-view(my_df) # Opens a new viewer and can be good for large data
-head(my_df) # pulls just the top 6 rows
-summary(my_df) # Gives a summary of each variable -- it is particularly useful for the numerical variables 
+y <- 8 # This is our new object 'y'
 ```
 
 Questions? 
 
-## Practical Data Examples
+## Practical Data Examples (Part 1)
 
-Now we are going to read in some data. In this tutorial, we are going to use the tidyverse package. For many of you, you'll need to install it
+### Up top items
+
+Now we are going to read in some data. In this tutorial, we are going to use the tidyverse package, the lubridate package, and the here package. If you have not already installed them, please do now using
+
+```{r eval=FALSE}
+install.packages("tidyverse", "lubridate", "here", "xlsx")
+```
 
 While this installs, I'll talk about packages. Packages simply put are just a collection of functions that were built for a specific purpose. You get to use the shorthand function, and the file that defines the function in the package actually just contains instructions that R can use on the back end to convert the function into base R commands.
 
@@ -139,32 +97,301 @@ The tidyverse is actually a suite of packages that are meant to simplify R progr
 After you've installed it (or if it was previously installed), we need to load it using library()
 
 ```{r}
-#install.packages("tidyverse")
 library(tidyverse)
 library(here)
+```
+
+library() tells R to load the package to the current session so that it can be used. Not all libraries are loaded all of the time because sometimes, their functions conflict with functions in other packages. Therefore, it is necessary to load a library when you want to use it
+
+Now we need to ensure that our working directory is set. The working directory (see the Files pane) is simply where R starts when it needs to look for files/data. Setting your working directory is crucial. This is why we use the 'here' package.
+
+In the console, we need to type the following code:
+`getwd()`
+
+It should say "~/DVAC_Nov_2020_intro_R_and_ggplot"
+i.e. it should match the output of `here()`
+
+If it does not, run `setwd(here())`
+
+### Mice
+
+Now let's start with some actual data. I have generated a dataset for a fictitious experiment looking at two different anxiety treatments (A and B) vs a placebo in mice. Disclaimer: I do not work with mice nor do I work in the realm of anxiety, so if my generic interpretations are off, please forgive me!
+
+First let's load in the data. This data is a Microsoft Excel file (in .xlsx form), so we will need to load the xlsx library
+
+```{r}
+library(xlsx)
+```
+
+Now, let's load the data and get a feel for what we're looking at. Note: if you're having trouble with an error claiming "Cannot find data/part1/mice.xlsx", then add `setwd(here())` in front and run the whole chunk. This is a small blip that can occur with .Rmd files
+
+```{r}
 setwd(here())
+mice <- read.xlsx(file = "data/part1/mice.xlsx",
+          sheetIndex = 1)
+```
+
+There's a few different functions you can use to take a look at the data
+
+```{r}
+head(mice); head(mice, 20)
+view(mice)
+mice; print(mice)
+
+str(mice)
+summary(mice)
+
+```
+
+We see that there are a couple of grouping variables like treatment and sex, and index variable (mouse_id), dates, weight, and then our primary dependent variable of interest: open_field_time
+
+Importantly, we see that this data could be cleaned a bit to make it more useful. For example, the NA. column appears to be an artifact from when I created and saved the mice data (oops). Additionally, sex and treatment are factors. These are essentially a data type that R knows you will likely use as a grouping variable. We can change these variables into factors easily.
+
+Additionally, let's say that our mouse tech got back to us and told us that some of the mice had some leg injuries meaning that their weight and behavior scores are affected -- we should remove these observations
+
+Let's make these changes
+
+Pipe operator can be read as "and then". It is used to take the output of one operation and use it as the input for the next
+
+%>%
+Shortcut: Ctrl+Shift+M
+
+```{r}
+injured <- c(4, 26, 51) #define the mice_ids of the injured mice
+
+mice_clean <- mice %>% 
+  select(-NA.) %>%                            #Select allows you to choose which variables to keep or remove (remove variables by putting the - sign in front)
+  mutate(sex = as.factor(sex),                #Mutate creates another variable for the data.frame. This can be a re-factoring of an existing variable or a completely new variable
+         treatment = as.factor(treatment)) %>% 
+  filter(!mouse_id %in% injured)             #Filter allows you to define observations (rows) to keep or remove based on logical criteria. Here, the "!" translates to "not" as in "mouse_ids NOT in injured". Note: filter() can take any logical criteria. E.g. filter(mice, weight > 20) would work just fine 
+
+#Now look at the output for summary()
+
+summary(mice_clean)
+
+#Now we have a nice count for exactly how many of each we have.
+```
+
+Great, so let's get to the good stuff
+
+In our hypothetical example, we are starting treatment with 1 of 3 treatment options 3 weeks after our mice's births. We can actually check that in the code:
+
+```{r}
+mice_clean %>% 
+  mutate(time_to_treatment = treatment_date - birthdates) #Here we used mutate to make a variable out of existing variables
+```
+
+So we see that our mice begin treatment at 3 weeks
+
+Now, let's say there are a few outputs we care about. We want to see which of our treatments reduces the anxiety levels in our mice. This is measured by the open field test. Simply put, mice don't want to be in the center of an open field because it exposes them to potential predators. Some anxiolytic drugs (or anxiety-reducing drugs) can increase a mouse's time spent in the center, supporting the paradigm for testing anxiety in mice (Choleris et al. 2001). We have collected data on the cumulative time a mouse spent in the center (using a camera with tracking software) -- this is stored in "open_field_time" and with the units of minutes
+
+We are also interested in the effect of the treatments on weight. We have some preliminary data suggesting that our anxious little mice aren't eating appropriately, and these anxiolytic treatments may help induce them to eat more
+
+Let's start by making some summaries of weight
+
+```{r}
+mice_clean %>% summary() #This gives us a cursory view of our variables, but does not show them by their grouping
+
+mice_clean %>% 
+  group_by(sex) %>% #Group_by allows you to choose some grouping variable off of which summarise()'s or mutate()'s will be done with respect to the grouping variable
+  summarise(ave = mean(weight),
+            sd = sd(weight),
+            range = max(weight) - min(weight))
+```
+
+Great! This is to be expected since male mice tend to be larger than female mice
+
+Let's check and see if it differs by treatment
+
+```{r}
+mice_clean %>% 
+  group_by(treatment) %>% 
+  summarise(ave = mean(weight),
+            sd = sd(weight),
+            med = median(weight))
+
+#Hmm, it looks like there may not be much of a difference. However, we know that sex is also a variable that plays a role in this
+
+# Let's group by both
+
+mice_clean %>% 
+  group_by(treatment, sex) %>% 
+  summarise(ave = mean(weight),
+            sd = sd(weight),
+            med = median(weight)) %>%  #This is kind of hard to read, so let's add and arrange() argument
+  arrange(sex, treatment)
+```
+
+However, there's another variable that we are clearly missing -- age
+
+```{r}
+mice_clean %>% 
+  arrange(desc(birthdates))
+```
+
+But this is not something you could really group_by() because it's a continous variable. The best way that we would do this is actually using a graph to summarize this information. Let's get to making our first graph
+
+On ggplot:
+  The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
+  
+  In short, the grammar of graphics states that graphs are generated layer by layer, with elements being stacked on top of one another.
+  
+Let's start with plotting the change in weight with the change in age
+
+```{r}
+#Let's start by making the base layer
+ggplot(data = mice_clean,
+       aes(x = birthdates,
+           y = weight,
+           shape = sex,
+           color = treatment))+ #aes() stands for the "aesthetic" layer. It contains specifications of what data will be on what axes
+  geom_point(size = 2)+
+  geom_smooth(method = "lm",
+              formula = "y ~ x") #This stands for linear model
+
+#Cool! We see that males are heavier than females, and the treatments mostly overlap although treatment B seems to be marginally higher in the males. Let's say we want to simplify some of these lines though
+
+ggplot(data = mice_clean,
+       aes(x = birthdates,
+           y = weight,
+           shape = sex))+ #aes() stands for the "aesthetic" layer. It contains specifications of what data will be on what axes
+  geom_point(size = 2,
+             aes(color = treatment))+
+  geom_smooth(method = "lm",
+              formula = "y ~ x",
+              color = "black")
+
+#Let's take their birthdates and mutate age from them
+
+mice_clean %>% 
+  mutate(age = Sys.Date() - birthdates) %>%  #Yes, we can pipe right into ggplot! 
+  ggplot(data = ., # data = . just indicates that our previous output (the data frame after the mutate) is the data for our plot. That's what the "." 'pronoun' means
+         aes(x = age,
+             y = weight,
+             shape = sex))+
+  geom_point(size = 2,
+             aes(color = treatment))+
+  geom_smooth(method = "lm",
+              formula = "y ~ x",
+              color = "black")+
+  theme_bw()+
+  labs(x = "Age (Days)",
+       y = "Weight (g)",
+       shape = "Sex",
+       color = "Treatment",
+       title = "The mice have normal weight gain")
+```
+
+Let's look at our behavior data
+
+First, let's mutate it out of minutes and into seconds
+
+```{r}
+mice_clean %>% 
+  mutate(open_field_time = open_field_time*60) %>% 
+  group_by(
+    #sex
+    treatment
+    ) %>% 
+  summarise(ave = mean(open_field_time),
+            sd = sd(open_field_time))
+
+#Wow that's robust! Let's plot this
+
+theme_set(theme_bw())
+
+ggplot(mice_clean,
+       aes(x = treatment,
+           y = open_field_time*60))+
+  #geom_point()+ #this is good, but there's a better way to summarize this
+  
+  geom_boxplot()+ #Good, but notice how the boxplot covers the points? How do we fix that?
+  
+  # geom_bar(stat = "summary",
+  #          fun.y = "mean",
+  #          fill = "red",
+  #          alpha = 0.3)+ # You have to define stat = "identity" because it defaults to stat = "count" and thinks that you want a histogram
+  # 
+  # stat_summary(geom = 
+  #                #"errorbar"
+  #                "linerange"
+  #                ,
+  #              fun.data = 'mean_sdl',
+  #              fun.args = list(mult = 1),
+  #              width = 0.25)+
+  
+  #geom_point()+ #By putting the point layer after the boxplot layer, ggplot stacks it on top. Remember, the grammar of graphics dictates plots are built in layers
+
+  #Now what if we want to have the points more spread and not so vertically stacked?
+  
+  #geom_jitter() takes your data and adds a tiny amount of random variance just to spread points out for graphing 
+  geom_jitter(width = 0.05, #Let's keep them mostly tight
+              height = 0,   # Let's prevent them from changing their vertical position (so that they better reflect what the median or average times are)
+              alpha = 0.5)+ # Let's make them stand out a bit less
+  labs(y = "Seconds spent in center",
+       x = "Treatment",
+       title = "Treatments A and B result in more time spent in the center",
+       subtitle = "This data is fake")
+
+ggsave(filename = "../results/mice_treatment_plot.png")
+
+ggplot(mice_clean %>% 
+         mutate(age = as.numeric(Sys.Date() - birthdates)),
+       aes(x = treatment,
+           y = weight,
+           #color = sex
+           ))+
+  geom_boxplot()+
+  geom_point(alpha = 0.5,
+             aes(color = age))+
+  facet_wrap(facets = ~sex)+
+  scale_color_viridis_c(option = "C")+
+  labs(y = "Weight (g)",
+       x = "Treatment",
+       color = "Age (days)",
+       title = "Differences in weight by treatment, sex, and age")
 ```
 
 
+
 ### HEK WB Data
+
+Now let's get into the actual data
 
 Let's say I have some WB quantification data for different HEK cell samples. However, I have two data files, one more updated than the other, and I want to clean the first one and then join it together with the more updated one and save it as a new file
 
 Here we are reading the data which is saved in the data/part1/ folder as a .csv file
 
 ```{r}
+setwd(here())
 hek1 <- read_csv("data/part1/10.23.19_hek.csv")
 hek2 <- read_csv("data/part1/hek_wb_combined.csv")
-
 ```
 
-Let's take a look
+Let's go over some functions you can use to take a peek at your data
 
 ```{r}
 head(hek1); head(hek2)
+view(hek1)
+view(hek2)
+
+summary(hek1)
+summary(hek2)
 ```
 
-Now let's clean this data -- we're going to use a series of functions that are all "piped" together so that the output of one is the input of th enext
+Now let's clean this data -- we're going to use a series of functions that are all "piped" together so that the output of one is the input of the next
+
+Summary:
+  Filter for new lysis methods
+  remove variables that aren't useful
+  rename a variable so that it matches the other data set
+  add a date variable
+  
+  Join the data
+  Make corrected value by dividing the value by the total protein signal
+  drop the unused variables
+  
+  Draw up a summary table that I can view
 
 ```{r}
 library(lubridate)
@@ -182,25 +409,73 @@ hek_combined_clean <- full_join(hek1_clean, hek2) %>%
 hek_combined_clean %>% 
   group_by(sampleid, protein) %>% 
   summarise(ave = mean(value_corrected),
-            sd = sd(value_corrected)) %>% 
+            med = median(value_corrected),
+            sd = sd(value_corrected),
+            range = max(value_corrected) - min(value_corrected),
+            count = n()) %>% 
   arrange(protein)
+```
 
-write_rds(hek_combined_clean, "data/part2/hek_wb_combined_clean.rds")
+Now let's experiment with different ways of graphing this data using ggplot
+
+On ggplot:
+  The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
+  
+  In short, the grammar of graphics states that graphs are generated layer by layer, with elements being stacked on top of one another. We can illustrate this with our WB example
+
+```{r}
+hek_combined_clean %>% 
+  ggplot(aes(x = protein, y = value_corrected, fill = sampleid))+
+  geom_boxplot()+
+  facet_wrap(facets = ~date)
+  #geom_point()
+
+hek_combined_clean %>% 
+  filter(date > mdy("10-23-2019")) %>% 
+  ggplot(aes(x = sampleid, y = value_corrected, fill = protein))+
+  geom_boxplot()+
+  facet_wrap(~protein,
+             scales = "free")+
+  xlab("")+
+  ylab("Corrected Intensity (A.U.)")+
+  ggtitle("There is no difference between the samples for these proteins")+
+  labs(fill = "Protein ID")+
+  theme_bw()
+
+# Let's take the fold change by each date
+
+hek_combined_clean %>% 
+  group_by(date, protein) %>% 
+  mutate(fold_change = value_corrected/first(value_corrected)) %>% 
+  ggplot(aes(x = sampleid, y = fold_change, fill = str_to_upper(protein)))+
+  geom_boxplot()+
+  facet_wrap(~ str_to_upper(protein),
+             scales = "free")+
+  xlab("")+
+  ylab("Corrected Intensity (Fold Change vs Sample A)")+
+  ggtitle("Sample D differs the most in these proteins")+
+  labs(fill = "Protein ID")+
+  theme_bw()
 ```
 
 ### Enzyme Contaminants
 
-Now let's say I have some enzyme assay data that I've taken at a few time points
+Now let's say I have some protein samples that I think are contaminated with active enzyme. So, I have taken some enzyme assay data that I've taken at a few time points
 
-I want to plot the change in values for the different samples over time. Some of my proteins are contaminated with an enzyme, and I need to see if they have enzymatic activity just on their own
+I want to plot the change in values for the different samples over time.
 
 ```{r}
-ts <- read_csv("data/part1/enzyme_contaminants_ts.csv")
+ts <- read_csv("../data/part1/enzyme_contaminants_ts.csv")
 ```
 
 ```{r}
 head(ts)
 ```
+
+There is not really much to clean from this data. However, we see that the data is in a "wide" or a "spread out" format. While it was more convenient to collect the data like this, I ideally want to pull the time variable (which is currently spread horizontally) to be vertical
+  This may be referred to as "melting" the data frame (in Python). 
+In R, this is called "pivoting" the data
+  Essentially, you take this output and pivot it from wide to long format. It is better understood when seen in action
 
 ```{r}
 ts_cleaned <- ts %>%
@@ -211,9 +486,51 @@ ts_cleaned <- ts %>%
     names_prefix = "t"
   ) %>%
   mutate(time_point = as.numeric(time_point))
-
-write_rds(ts_cleaned, "data/part2/enzyme_contaminants_ts_cleaned.rds")
 ```
 
-### Others?
+```{r}
+ts_cleaned %>% 
+  ggplot(aes(x = time_point, y = value, color = sampleid))+
+  geom_point()+
+  geom_smooth(method = "lm",
+              formula = "y ~ x",
+              se = TRUE)+
+  xlab("Time (min)")+
+  ylab("Fluorescence (A.U.)")+
+  labs(color = "")+
+  ggtitle("Protein A has identical activity to the enzyme itself!")+
+  theme_classic()
+```
 
+### DRC
+
+Let's say I have some enzyme assay data that I want to use a DRC for
+
+```{r}
+drc <- read_csv("../data/part1/drc.csv")
+
+drc
+```
+
+It looks like this data is already tidy and ready to be plotted! How do we plot a nonlinear line?
+
+```{r}
+drc %>% 
+  ggplot(aes(dose, values))+
+  geom_point()+
+  geom_smooth(method = "nls",
+              formula = "y ~ ylo + x*(yhi-ylo)/(k+x)", #You do have to know what formula will fit your data! This is the formula for a dose response curve with a hill slope of 1
+              method.args = list(
+                start = c(yhi = 0.25, ylo = 0, k = 1)),
+              se = FALSE, #Make sure you set standard error (se) to be false. Unfortunately, this calculation can prevent proper plotting if the points do not fit the line very well.
+              color = "black")+
+  theme_bw()+
+  xlab("Dose (nM)") + ylab("Absorbance (A.U.)")
+```
+
+
+## Citations
+
+Choleris, E., Thomas, A. W., Kavaliers, M., & Prato, F. S. (2001). A detailed ethological analysis of the mouse open field test: effects of diazepam, chlordiazepoxide and an extremely low frequency pulsed magnetic field. Neuroscience and biobehavioral reviews, 25(3), 235–260. https://doi.org/10.1016/s0149-7634(01)00011-2
+
+https://vita.had.co.nz/papers/layered-grammar.html
