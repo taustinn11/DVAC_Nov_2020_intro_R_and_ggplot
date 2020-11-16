@@ -1,0 +1,146 @@
+---
+title: "Intro_to_R_live_Part2_key"
+author: "Jess Hoffman"
+date: "11/4/2020"
+output: html_document
+---
+Part 2 will cover a few important and frequently used plots for biological data: histograms, volcano plots, PCA plots, and heatmaps.
+
+## 0. Load Packages
+```{r message=FALSE, warning=FALSE}
+library(plyr)
+library(tidyverse)
+
+# make sure you also set your working directory to load in the part2 data: 
+# setwd("~/GitHub/DVAC_Nov_2020_intro_R_and_ggplot") # replace with your path to the DVAC cloned folder
+```
+
+
+##  1. Histogram
+Histograms show frequency distributions, or how often each value occurs in a data set.
+Histograms are can be used to identify outliers and determine the shape of distribution (ex. skew left/right, unimodal, bimodal, etc.)
+
+
+For this example, I'm using log-transformed microarray data from 3 samples: E1, E2, E3. We will first munge the data with pivot_longer so that it's in tidy format (one variable per column).
+
+```{r}
+RNA = read_csv("data/part2/microarray.csv") #read in data
+
+# data munging --> pivot longer
+RNA_long <- RNA %>%
+  pivot_longer(
+    contains("E"), #combine columns with "E" in the name
+    names_to = "Sample", #put sample names in one column
+    values_to = "value", #put values in its own column
+    names_prefix = "E") #cutoff E
+
+mu <- ddply(RNA_long, "Sample", summarise, smean=mean(value))
+head(mu) #get sample means
+
+ggplot(data = RNA_long, aes(x=value, color=Sample, fill=Sample)) + #color by sample label
+  geom_histogram(binwidth=0.5, alpha=0.5, position="identity") + #identity = overlapped look, alpha = color opacity
+  xlab("log2(expression)")+
+  theme_classic()+ 
+  geom_vline(data=mu, aes(xintercept=smean, color=Sample), linetype="dashed")
+# These data are similarily distributed, skewed right
+```
+
+## 2. Heatmap
+Illustrate data by color.
+
+In this example, my dataset is from an animal myocardial infarction (MI) model. There are two treatment groups: placebo & drug treatment, and two tissue areas: border zone (BZ) and infarct zone (IZ). These values are pre-filtered and normalized.
+The heatmap will display differences in gene expression amongst these groups and we will get unsupervised clustering of the samples.
+
+```{r}
+library(pheatmap) #best heatmap package available (imo). Super customizable.
+library(viridis) #color scheme
+
+MI = read.csv("data/part2/acuteMI.csv") #read in data
+rownames(MI) = MI[,1]; MI = MI[,2:ncol(MI)] #make the miRNA names the row names
+
+area = c("BZ","BZ","IZ","IZ","BZ","BZ","IZ","IZ") 
+group = c(rep("Placebo",4), rep("Treated", 4))
+
+# data munging
+groups = data.frame(Group = group, Area = area)
+rownames(groups) = colnames(MI)
+
+#color code the sample location and treatment group:
+annotation_colors = list(Group = c(Placebo="gray50", Treated="black"), Area = c(BZ="#E55C58", IZ="#51B12C"))
+
+pheatmap(MI,
+         cluster_rows = T, #cluster the microRNAs
+         cluster_cols = T, #cluster the samples
+         color = viridis(10), #set the heatmap color ranage, 10 colors on the viridis scale
+         show_rownames = TRUE,
+         show_colnames = FALSE,
+         border_color = NA, #remove grey square around boxes
+         annotation_col = groups, #annotation dataframe
+         annotation_colors = annotation_colors, #colors in the annotation bars
+         fontsize = 8)
+```
+
+## 3. PCA
+
+Principal component analysis (PCA) is a dimensionality-reduction method. It takes large datasets and transforms them to 2 or 3 components so the data may be illustrated and interpreted. PCA is often used to see how samples cluster.
+
+Here, I'm using the same dataset as above. I reduce the set of 36 miRs from 8 samples down to 2D space and see the same clustering of tissue areas as the heatmap above.
+
+```{r}
+PCA <- prcomp(t(MI)) #calculate principal components, samples must be listed as rows so use the transpose, t(), function.
+percentVar <- round(100*PCA$sdev^2/sum(PCA$sdev^2),1) #Calculate what percent of variance each PC describes
+
+dataGG <- data.frame(PC1 = PCA$x[,1], PC2 = PCA$x[,2], #setup plotting dataframe with first 2 components
+                     Sample = colnames(MI),
+                     Area = area,
+                     Group = group)
+
+ggplot(dataGG, aes(PC1, PC2)) + #plot 1st 2 components
+  geom_point(aes(shape = Group, colour = Area, size = 2)) + #color by heart section and shape by treatment group
+  guides(size = FALSE, color = guide_legend(override.aes = list(size=4)), shape = guide_legend(override.aes = list(size=4)))+ #Alter the legend, remove size and increase the points in the area and group legend
+  ggtitle("miRNA - PCA") + #give it a title
+  xlab(paste("PC1, VarExp: ", percentVar[1], "%")) + #concatenate strings with the % Var described
+  ylab(paste("PC2, VarExp: ", percentVar[2], "%")) +
+  xlim(-15,15) + #set axis bounds
+  ylim(-15,15) +
+  theme(aspect.ratio=1) + #square plot
+  geom_hline(yintercept=0, color = "gray45", size=0.5) + #set intercept lines
+  geom_vline(xintercept=0, color = "gray45", size=0.5) 
+```
+
+## Volcano plot
+Volcano plots are scatterplots which show statistical significance vs. foldchange. We often use these to show up and downregulated genes/proteins between 2 experimental groups.
+
+These data are the differences between tissue sections in the treatment group from the MI data.
+```{r}
+library(ggrepel) #has extra features for ggplot2. We use it here to label points in the plot.
+
+vp <- read_csv("data/part2/volcanoex.csv") #data frame with microRNA, p-value, -log10(p-value), and log2(fc)
+head(vp)
+
+vp %>%  # you can use the tidyverse pipe instead of data=vp. Just another option
+  ggplot(aes(log2fc, logp.value))+ #plot fc vs. p
+  geom_point(alpha = .5)+ #point transparency
+  geom_point(data = filter(vp, log2fc < -log2(1.5) & p.value < 0.05), color = "blue", alpha = 0.5)+ #color miRs with p<0.05 and fc<-1.5 blue
+  geom_point(data = filter(vp, log2fc > log2(1.5) & p.value < 0.05), color = "orange", alpha = 0.5)+
+  geom_hline(yintercept = -log10(0.05), linetype = 2)+ #put horizontal line at p=0.05
+  geom_vline(xintercept = c(-log2(1.5),log2(1.5)), linetype = 2)+ #put vertical lines at |fc|=1.5
+  geom_label_repel(data = vp %>% #label points
+                     filter(log2fc >= log2(1.5) & p.value < 0.05) %>% #filter to significant points
+                     arrange(desc(log2fc)) %>% 
+                     slice(1:30), 
+                   aes(label = id),
+                   size = 2.5,
+                   segment.alpha = 0.5)+
+  geom_label_repel(data = vp %>% 
+                     filter(log2fc <= -log2(1.5) & p.value < 0.05) %>% 
+                     arrange(log2fc) %>% 
+                     slice(1:30), 
+                   aes(label = id),
+                   size = 2.5) +
+  theme(aspect.ratio=1) #set plot to square area
+```
+
+
+
+
