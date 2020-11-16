@@ -1,0 +1,88 @@
+---
+title: "Intro_to_R_live_Part2_key"
+author: "Jess Hoffman"
+date: "11/4/2020"
+output: html_document
+---
+Part 2 will cover a few important and frequently used plots for biological data: histograms, bar plots, scatterplots (w/regression), volcano plots, PCA plots, and heatmaps.
+
+##  Histogram
+intro blah
+```{r}
+setwd("~/Documents/DVAC_Nov_2020_intro_R_and_ggplot")
+
+#log-transformed RNA microarray data - 3 samples labeled E1, E2, E3
+RNA = read_csv("data/part2/microarray.csv") 
+# data manipulation --> pivot longer
+RNA_long <- RNA %>%
+  pivot_longer(
+    contains("E"),
+    names_to = "sample",
+    values_to = "value",
+    names_prefix = "E")
+
+ggplot(RNA_long, aes(x=value, color=sample, fill=sample)) + #color by sample label
+  geom_histogram(binwidth=0.5, alpha=0.5, position="identity") + #identity = overlapped look, alpha = color opacity
+  xlab("log2(expression)")+
+  theme_classic()
+# These data are similarily distributed
+```
+
+## Barplot
+
+## Scatterplot (w/regression)
+
+## Volcano plot
+
+## PCA/heatmap
+```{r}
+setwd("~/Documents/DVAC_Nov_2020_intro_R_and_ggplot")
+#pre-filtered and normalized data. These are the most variable miRNAs in various sections of a MI model heart
+MI = read.csv("data/part2/acuteMI.csv")
+rownames(MI) = MI[,1]; MI = MI[,2:ncol(MI)] #make the miRNA names the row names
+head(MI)
+area = c("BZ","BZ","IZ","IZ","BZ","BZ","IZ","IZ")
+group = c(rep("Placebo",4), rep("Treated", 4))
+
+#PCA
+PCA <- prcomp(t(MI), scale = FALSE); PCA
+percentVar <- round(100*PCA$sdev^2/sum(PCA$sdev^2),1); percentVar #What percent of variance each PC describes
+dataGG <- data.frame(PC1 = PCA$x[,1], PC2 = PCA$x[,2],
+                     Sample = colnames(MI),
+                     Area = area,
+                     Group = group)
+
+ggplot(dataGG, aes(PC1, PC2)) +
+  geom_point(aes(shape = Group, colour = Area, size = 2)) +
+  guides(size = FALSE, color = guide_legend(override.aes = list(size=4)), #Alter the legend
+         shape = guide_legend(override.aes = list(size=4)))+ 
+  ggtitle("miRNA - PCA") + #give it a title
+  xlab(paste0("PC1, VarExp: ", percentVar[1], "%")) +
+  ylab(paste0("PC2, VarExp: ", percentVar[2], "%")) +
+  xlim(-15,15) +
+  ylim(-15,15) +
+  theme(aspect.ratio=1) + #square plot
+  geom_hline(yintercept=0, color = "gray45", size=0.5) +
+  geom_vline(xintercept=0, color = "gray45", size=0.5) 
+```
+
+```{r}
+library(pheatmap) #best heatmap package available (imo). Super customizable.
+# data manipulation
+groups = data.frame(Group = group, Area = area)
+rownames(groups) = colnames(MI)
+#color code the sample location and treatment group:
+annotation_colors = list(Group = c(Placebo="gray50", Treated="black"), Area = c(BZ="#E55C58", IZ="#51B12C"))
+
+pheatmap(MI,
+         cluster_rows = T,
+         cluster_cols = T,
+         color = viridis(10),
+         show_rownames = TRUE,
+         show_colnames = FALSE,
+         border_color = NA,
+         annotation_col = groups,
+         annotation_colors = annotation_colors,
+         fontsize = 8)
+```
+

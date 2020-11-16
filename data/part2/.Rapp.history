@@ -1,0 +1,3 @@
+load("/Users/jhoff18/Documents/DVAC_Nov_2020_intro_R_and_ggplot/data/part2/drc.rds")
+load("/Users/jhoff18/Documents/DVAC_Nov_2020_intro_R_and_ggplot/data/part2/enzyme_contaminants_ts_cleaned.rds")
+load("/Users/jhoff18/Documents/DVAC_Nov_2020_intro_R_and_ggplot/data/part2/hek_wb_combined_clean.rds")

@@ -1,0 +1,9 @@
+well_id,sample_id,sample,dose,values
+C2,1,Smpd1,15,0.053
+D2,2,Smpd1,15,0.088
+E2,3,Smpd1,30,0.132
+F2,4,Smpd1,30,0.193
+G2,5,Smpd1,60,0.269
+B3,6,Smpd1,60,0.2
+C3,7,Smpd1,102.6,0.256
+D3,8,Smpd1,102.6,0.273

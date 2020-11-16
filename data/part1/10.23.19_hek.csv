@@ -1,0 +1,17 @@
+sampleid,lysis,blotid,protein,value,tp
+E71,old,a2,lamp2,0.607,1290
+C42,old,a2,lamp2,0.674,1380
+E71,new,a2,lamp2,0.236,984
+C42,new,a2,lamp2,0.209,1060
+E71,old,b1,hexa,0.324,914
+C42,old,b1,hexa,0.331,954
+E71,new,b1,hexa,0.14,782
+C42,new,b1,hexa,0.13,832
+E71,old,b2,ctsd.im,2.16,992
+C42,old,b2,ctsd.im,0.761,1020
+E71,new,b2,ctsd.im,2.04,775
+C42,new,b2,ctsd.im,1.73,768
+E71,old,b2,ctsd.mat,3,992
+C42,old,b2,ctsd.mat,2.35,1020
+E71,new,b2,ctsd.mat,1.48,775
+C42,new,b2,ctsd.mat,0.809,768
