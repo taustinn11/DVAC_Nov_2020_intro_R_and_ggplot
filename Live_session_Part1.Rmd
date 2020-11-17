@@ -1,0 +1,232 @@
+---
+title: "Live_Part1"
+author: "Austin Nuckols"
+date: "11/16/2020"
+output: html_document
+---
+
+## Intro
+
+These are notes
+
+Shortcuts: 
+To insert a chunk - Ctrl + Alt + I
+To run code - Ctrl + Enter
+
+```{r}
+y <- 54
+x + y
+
+```
+
+Using comments
+
+```{r}
+# this is comment
+x + 20 # This is important
+```
+Shortcut:
+Assignment - Alt + - (minus sign)
+
+```{r}
+z <- 100
+```
+
+## Practical Data Examples
+
+### Up top
+
+```{r}
+install.packages("tidyverse", "lubridate", "here", "xlsx")
+```
+
+Package: Group of functions or useful data that a person will "write" -- these make it easier code
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+### Mice
+
+Table of mice data
+- Anxiety treatments: A, B, Placebo
+- Anxiety levels: Open field test
+-- if a mouse is less anxious, then they will spend more time in the center
+
+```{r}
+library(xlsx)
+```
+
+Read the data
+
+```{r}
+mice <- read.xlsx(file = "data/part1/mice.xlsx",
+          sheetIndex = 1)
+```
+
+```{r}
+mice <- read_csv(file = "data/part1/mice.csv")
+```
+
+View your data 
+
+```{r}
+head(mice, 10)
+view(mice)
+mice
+
+############
+
+str(mice)
+#tibble == data.frame for our purposes
+
+summary(mice)
+```
+
+Manipulating the data
+
+Shortcut: 
+Pipe - %>% 
+Ctrl + Shift + M
+
+```{r}
+mice %>% # "And then"
+  select(-X1) %>% # Now change sex and treatment to factors
+  mutate(sex = as.factor(sex),
+         treatment = as.factor(treatment))
+```
+
+
+Soem of the mice were injured. We don't want these mice -- need to filter out these
+
+mouse id = 1, 24, 37
+
+```{r}
+library(lubridate)
+
+injured <- c(1, 24, 37)
+
+mice_clean <- mice %>% # %>% is the same as "And then"
+  select(-X1) %>% # Now change sex and treatment to factors
+  mutate(sex = as.factor(sex), #mutate() adds/changes variables in a data frame
+         treatment = as.factor(treatment)) %>% 
+  #filter(weight > 20)
+  filter(!mouse_id %in% injured) %>% # filter() removes or keeps rows based on logical criteria
+  mutate(birthdates = mdy(birthdates))
+```
+
+Summary of the data
+
+```{r}
+mice_clean %>% 
+  summary()
+
+mice_clean %>% 
+  group_by(sex) %>%  #group_by() allows you to define grouping variables after which mutate()'s and summarise()'s will be done with respect to those variables
+  summarise(ave_weight = mean(weight), #summarise reduces your data down to the summary functions (mean, sd, median, etc.) that you choose
+            med_weight = median(weight),
+            sd_weight = sd(weight))
+
+## gropu by two variables
+
+
+mice_clean %>% 
+  group_by(sex, treatment) %>% 
+  summarise(ave_weight = mean(weight),
+            med_weight = median(weight),
+            sd_weight = sd(weight))
+
+head(mice_clean)
+```
+
+- Graph 
+
+ggplot2 is a package in tidyverse
+
+On ggplot:
+  The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
+  
+  In short, the grammar of graphics states that graphs are generated layer by layer, with elements being stacked on top of one another.
+
+```{r}
+mice_weight_gg <- ggplot(data = mice_clean,
+       aes(x = birthdates,#aes() - where you define your variabels of interest
+           y = weight,
+           color = sex)) + 
+  geom_point(alpha = 0.5) +  #alpha is for transparency
+  geom_smooth(method = "lm", #geom_smooth is for adding lines of best fit
+              formula = "y ~ x",
+              se = FALSE) + #for nonlinear lines, use "nls" -- look this up
+  theme_bw()+ #theme_*()'s are used to change the layout of your graph
+  labs(x = "Birthdates", #Change your labels easily with labs()
+       y = "Weight (g)",
+       color = "Sex",
+       title = "Mouse weights by sex over time")
+
+mice_weight_gg
+
+#Save the graph 
+
+ggsave(filename = "results/mice_weight_over_time.png") #make sure to add file extension
+
+#you can change the dimensions inside of the ggsave function
+```
+
+```{r}
+mice_clean %>% 
+  ggplot(data = .,
+         aes(x = treatment,
+             y = open_field_time*60))+
+
+#BOXPLOT - MEDIAN_IQRs_RANGES
+  #geom_boxplot()+
+  
+#BAR PLOT w/ ERRORBARS - MEAN_SD
+  # geom_bar(stat = "summary",
+  #          fun.y = "mean")+
+  # 
+  # stat_summary(geom = "errorbar",
+  #              fun.data = "mean_sdl",
+  #              fun.args = list(mult = 1),
+  #              width = 0.25)+
+
+#CROSSBAR PLOT - MEAN_SD
+  stat_summary(geom =
+                 "crossbar"
+                 ,
+               fun.data = 'mean_sdl',
+               fun.args = list(mult = 1),
+               #width = 0.25
+               )+
+  
+  geom_point(alpha = 0.3)+
+  theme_light()+
+  labs(x = "Treatment",
+       y = "Seconds spent in the center",
+       title = "Treatment A and B are higher than Placebo")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

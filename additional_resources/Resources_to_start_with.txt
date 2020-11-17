@@ -1,0 +1,13 @@
+Great resources for getting started!
+
+Easy guide to making different plots in ggplot
+http://r-statistics.co/ggplot2-Tutorial-With-R.html
+
+Great starting resource for using R in general
+https://r4ds.had.co.nz/
+
+Great resource for using R in the context of Biostatistics
+https://tjmurphy.github.io/jabstb/index.html
+
+RStudio Tutorial
+https://youtu.be/riONFzJdXcs?t=94
