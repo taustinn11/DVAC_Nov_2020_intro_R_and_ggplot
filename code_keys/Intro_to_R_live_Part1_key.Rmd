@@ -24,7 +24,8 @@ You have 4 panes: Source Pane, Console, Environment/History, Files/etc pane
   - Packages just shows your package library and the ones that are currently loaded. You can mostly ignore this
   - Help can be used to look up the help page of a function `(help(mean))`
   - Viewer is for some other outputs that aren't plots
-- Source is where scripts (or similar file types) you are working on will go.    - Importantly, what you put in your console should be considered NOT saved, so code that you like should always be put into the script file
+- Source is where scripts (or similar file types) you are working on will go. 
+- Importantly, what you put in your console should be considered NOT saved, so code that you like should always be put into the script file
 
 You can open a script file in the top left corner by clicking the white sheet with a green plus on it, or by choosing File > New File > R Script. Also, if you want to take notes directly in the editor, I recommend using an R Markdown file which will let you separate code and regular text. When I say "script" in this workshop moving forward, I will be referring to any of these file types
 
@@ -40,8 +41,8 @@ Let's talk about some code
 
 To run code you can press enter in the Console or press Ctrl+Enter (or Cmd+Enter for Mac) when in a script/chunk.
 
-If you are in Rmd right now, choose the Insert option (just above the source pane w/ Green square with a c and a plus) and choose 'R' to insert an R chunk. In Rmd this is how code is separated from text and can run
-x
+If you are in Rmd right now, choose the Insert option (just above the source pane w/ Green square with a c and a plus) and choose 'R' to insert an R chunk. In Rmd this is how code is separated from text
+
 `Shortcut: Ctrl+Alt+I - this inserts a chunk`
 
 ```{r}
@@ -65,6 +66,7 @@ You can put comments in the same line as actual code as long as it's after the c
 ```
 
 ```{r}
+x <- 10
 x # Add another comment
 ```
 
@@ -92,7 +94,7 @@ install.packages("tidyverse", "lubridate", "here", "xlsx")
 
 While this installs, I'll talk about packages. Packages simply put are just a collection of functions that were built for a specific purpose. You get to use the shorthand function, and the file that defines the function in the package actually just contains instructions that R can use on the back end to convert the function into base R commands.
 
-The tidyverse is actually a suite of packages that are meant to simplify R programming and empower the users. We are going to work using functions from within tidyverse packages
+The tidyverse is actually a suite of packages that are meant to simplify R programming and empower the users. We are going to work using functions from within tidyverse packages.
 
 After you've installed it (or if it was previously installed), we need to load it using library()
 
@@ -117,7 +119,7 @@ If it does not, run `setwd(here())`
 
 Now let's start with some actual data. I have generated a dataset for a fictitious experiment looking at two different anxiety treatments (A and B) vs a placebo in mice. Disclaimer: I do not work with mice nor do I work in the realm of anxiety, so if my generic interpretations are off, please forgive me!
 
-First let's load in the data. This data is a Microsoft Excel file (in .xlsx form), so we will need to load the xlsx library
+First let's load in the data. This data is a Microsoft Excel file (in .xlsx form), so we will need to load the xlsx library. *Note: you need to have a recent version of JAVA installed!* If this proves to be a barrier, then convert the data to .csv format for ease of reading.
 
 ```{r}
 library(xlsx)
@@ -172,11 +174,13 @@ summary(mice_clean)
 #Now we have a nice count for exactly how many of each we have.
 ```
 
-Notice that I am giving a descriptive name to the mice object after I make the modifications that I want to make. Instead of mice2 or mice3, I'm using mice_clean since I have done all of my cleaning operations in one shot. The other thing to notice is that I'm using snake case. This is the use of underscores to separate words. There are other methods like CamelCase or using dot.case. CamelCase is fine, but I would recommend against dot case because many programming languages use "." to separate an object and the method used on it (if you're familiar with Python or Javascript, then you've definitely seen this). Overall, CamelCase or snake_case are the best to use. I will use snake case. **The grand takeaways are 1) use a naming strategy that does not reinforce bad habits or conflict with other languages you may use (ie use CamelCase or snake_case) and 2) use descriptive terms when naming your objects. This will be incredibly useful when you have to revisit old code**
+Notice that I am giving a descriptive name to the mice object after I make the modifications that I want to make. Instead of mice2 or mice3, I'm using mice_clean since I have done all of my cleaning operations in one shot. The other thing to notice is that I'm using snake case. This is the use of underscores to separate words. There are other methods like CamelCase or using dot.case. CamelCase is fine, but I would recommend against dot case because many programming languages use "." to separate an object and the method used on it (if you're familiar with Python or Javascript, then you've definitely seen this). Overall, CamelCase or snake_case are the best to use. I will use snake case. 
+
+**The grand takeaways are 1) use a naming strategy that does not reinforce bad habits or conflict with other languages you may use (ie use CamelCase or snake_case) and 2) use descriptive terms when naming your objects. This will be incredibly useful when you have to revisit old code**
 
 Great, so let's get to the good stuff
 
-In our hypothetical example, we are starting treatment with 1 of 3 treatment options 3 weeks after our mice's births. We can actually check that in the code:
+In our hypothetical example, we are starting treatment with 1 of 3 treatment options 3 weeks after our mices' births. We can actually check that in the code:
 
 ```{r}
 mice_clean %>% 
@@ -231,7 +235,7 @@ mice_clean %>%
   arrange(desc(birthdates))
 ```
 
-But this is not something you could really group_by() because it's a continous variable. The best way that we would do this is actually using a graph to summarize this information. Let's get to making our first graph
+But this is not something you could really group_by() because it's a continuous variable. The best way that we would do this is actually using a graph to summarize this information. Let's get to making our first graph.
 
 On ggplot:
   The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
@@ -355,10 +359,7 @@ ggplot(mice_clean %>%
 ```
 
 
-
 ### HEK WB Data
-
-Now let's get into the actual data
 
 Let's say I have some WB quantification data for different HEK cell samples. However, I have two data files, one more updated than the other, and I want to clean the first one and then join it together with the more updated one and save it as a new file
 
@@ -419,11 +420,6 @@ hek_combined_clean %>%
 ```
 
 Now let's experiment with different ways of graphing this data using ggplot
-
-On ggplot:
-  The "gg" stands for Grammar of Graphics (https://vita.had.co.nz/papers/layered-grammar.html)
-  
-  In short, the grammar of graphics states that graphs are generated layer by layer, with elements being stacked on top of one another. We can illustrate this with our WB example
 
 ```{r}
 hek_combined_clean %>% 
@@ -522,7 +518,7 @@ drc %>%
   geom_point()+
   geom_smooth(method = "nls",
               formula = "y ~ ylo + x*(yhi-ylo)/(k+x)", #You do have to know what formula will fit your data! This is the formula for a dose response curve with a hill slope of 1
-              method.args = list(
+              method.args = list( # When using nonlinear methods, you'll need to give 'start' arguments to tell the optimization algorthim where to start looking for the data. Feel free to play around with these if the model fails to converge
                 start = c(yhi = 0.25, ylo = 0, k = 1)),
               se = FALSE, #Make sure you set standard error (se) to be false. Unfortunately, this calculation can prevent proper plotting if the points do not fit the line very well.
               color = "black")+
@@ -530,6 +526,9 @@ drc %>%
   xlab("Dose (nM)") + ylab("Absorbance (A.U.)")
 ```
 
+Note: I highly recommend looking at the Graphpad Prism website if you do not know exactly which model best fits your data. They have great resources for considering different models, and you can pull the equations from them.
+
+https://www.graphpad.com/guides/prism/7/curve-fitting/reg_entering_data_for_nonlinear_re.htm
 
 ## Citations
 
